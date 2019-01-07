@@ -49,11 +49,16 @@ namespace dxvk {
     dedMemoryAllocInfo.image  = VK_NULL_HANDLE;
 
     m_vkd->vkGetBufferMemoryRequirements2KHR(
-       m_vkd->device(), &memReqInfo, &memReq);
+      m_vkd->device(), &memReqInfo, &memReq);
 
+    bool highPriority = (createInfo.usage & (
+      VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+      VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT));
+    
     bool useDedicated = dedicatedRequirements.prefersDedicatedAllocation;
     m_memory = memAlloc.alloc(&memReq.memoryRequirements,
-      useDedicated ? &dedMemoryAllocInfo : nullptr, memFlags);
+      useDedicated ? &dedMemoryAllocInfo : nullptr, memFlags,
+      highPriority ? 1.0f : 0.5f);
     
     if (m_vkd->vkBindBufferMemory(m_vkd->device(), m_handle,
         m_memory.memory(), m_memory.offset()) != VK_SUCCESS)

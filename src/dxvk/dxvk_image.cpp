@@ -88,10 +88,16 @@ namespace dxvk {
       memReq.memoryRequirements.size      = align(memReq.memoryRequirements.size,       memAlloc.bufferImageGranularity());
       memReq.memoryRequirements.alignment = align(memReq.memoryRequirements.alignment , memAlloc.bufferImageGranularity());
     }
+    
+    bool highPriority = (createInfo.usage & (
+      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT         |
+      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+      VK_IMAGE_USAGE_STORAGE_BIT)) != 0;
 
     bool useDedicated = dedicatedRequirements.prefersDedicatedAllocation;
     m_memory = memAlloc.alloc(&memReq.memoryRequirements,
-      useDedicated ? &dedMemoryAllocInfo : nullptr, memFlags);
+      useDedicated ? &dedMemoryAllocInfo : nullptr, memFlags,
+      highPriority ? 1.0f : 0.5f);
     
     // Try to bind the allocated memory slice to the image
     if (m_vkd->vkBindImageMemory(m_vkd->device(),
