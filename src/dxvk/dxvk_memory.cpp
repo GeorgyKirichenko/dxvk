@@ -156,8 +156,7 @@ namespace dxvk {
   : m_vkd             (device->vkd()),
     m_adapter         (device->adapter()),
     m_devProps        (m_adapter->deviceProperties()),
-    m_memProps        (m_adapter->memoryProperties()),
-    m_allowOvercommit (device->config().allowMemoryOvercommit) {
+    m_memProps        (m_adapter->memoryProperties()) {
     for (uint32_t i = 0; i < m_memProps.memoryHeapCount; i++) {
       VkDeviceSize heapSize = m_memProps.memoryHeaps[i].size;
       
@@ -290,11 +289,6 @@ namespace dxvk {
           VkDeviceSize                      size,
           float                             priority,
     const VkMemoryDedicatedAllocateInfoKHR* dedAllocInfo) {
-    if ((type->memType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-     && (type->heap->stats.memoryAllocated + size > type->heap->properties.size)
-     && (!m_allowOvercommit))
-      return DxvkDeviceMemory();
-    
     DxvkDeviceMemory result;
     result.memSize  = size;
     result.memFlags = flags;
